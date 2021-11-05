@@ -42,7 +42,7 @@ def main():
     filepath = askopenfilename()
     print(filepath)
 
-    playSound()
+    # playSound()
 
     y, Fs, tt = readFile(filepath)
 
