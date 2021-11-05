@@ -1,0 +1,16 @@
+function Fs = tGraph(fName)
+    disp(fName);
+
+    [y,Fs] = audioread(fName);
+
+    Fs = Fs;
+    
+    %info = audioinfo(fName);
+
+    %t = 0:seconds(1/Fs):seconds(info.Duration);
+    %t = t(1:end-1);
+    
+    %plot(t,y)
+    %xlabel('Time')
+    %ylabel('Audio Signal')
+end

@@ -1,8 +1,19 @@
 import tkinter as tk
 import matlab.engine
+import pandas as pd
 
-eng1 = matlab.engine.start_matlab()
+def main ():
+    eng1 = matlab.engine.start_matlab()
 
-print(eng1)
+    root = tk.Tk()
 
-eng1.quit()
+    Fs = eng1.tGraph('handel.wav',nargout=0)
+    print(type(Fs))
+
+    root.mainloop()
+
+    eng1.quit()
+
+if __name__ == "__main__":
+    main()
+
