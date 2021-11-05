@@ -7,8 +7,9 @@ def main ():
 
     root = tk.Tk()
 
-    Fs = eng1.tGraph('handel.wav',nargout=0)
-    print(type(Fs))
+    y = matlab.double(eng1.tGraph('handel.wav',nargout=0))
+
+    print(y)
 
     root.mainloop()
 

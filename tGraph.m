@@ -1,9 +1,9 @@
-function Fs = tGraph(fName)
+function y = tGraph(fName)
     disp(fName);
 
     [y,Fs] = audioread(fName);
+    y = y.';
 
-    Fs = Fs;
     
     %info = audioinfo(fName);
 
