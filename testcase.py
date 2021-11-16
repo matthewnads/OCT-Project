@@ -11,7 +11,7 @@ eng1 = matlab.engine.start_matlab()
 
 class MainWindow(QtWidgets.QMainWindow):
 
-    filepath = None
+    _filepath = None
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -42,7 +42,9 @@ class MainWindow(QtWidgets.QMainWindow):
         fileButton.setShortcut('Ctrl+O')
         fileButton.triggered.connect(self.getFiles)
         self.toolbar.addAction(fileButton)
-
+        playButton=QAction("Play",self)
+        playButton.triggered.connect(self.play)
+        self.toolbar.addAction(playButton)
         #graphButton = QAction("Graph", self)
         #graphButton.setShortcut('Ctrl+O')
         #graphButton.triggered.connect(self.plottingFig(self.graphWidget))
@@ -61,6 +63,13 @@ class MainWindow(QtWidgets.QMainWindow):
         #tt = len(y)/float(Fs)
         y, Fs, tt = eng1.tGraph(filepath, nargout=3)
         self.plottingFig(y, Fs, tt, self.graphWidget)
+        global _filepath
+        _filepath = filepath 
+        
+        
+    def play(self):
+        eng1.playSound(_filepath,nargout=0)
+ 
 
 
 def main():
