@@ -93,11 +93,23 @@ class MainWindow(QtWidgets.QMainWindow):
 def main():
     # playSound(filepath)
 
+
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
     main.show()
     print(sd.query_devices())  # fix
     sys.exit(app.exec_())
+
+#     commented  the below out because of conflict to from qt to main
+#     filepath = askopenfilename()
+#     print(filepath)
+
+#     # playSound()
+
+#     y, Fs, tt = readFile(filepath)
+
+#     y,Fs,tt = eng1.tGraph(filepath,nargout=3)
+
 
 
 if __name__ == "__main__":
