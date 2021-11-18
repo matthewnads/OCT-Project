@@ -1,4 +1,4 @@
-function playSound()
-    [y,Fs] = audioread('handel.wav');
+function playSound(fName)
+    [y,Fs] = audioread(fName);
     sound(y,Fs)
 end
