@@ -9,6 +9,7 @@ import sys
 import random
 import colorsys
 import sounddevice as sd
+import pygame as pgame
 
 eng1 = matlab.engine.start_matlab()
 
@@ -87,18 +88,24 @@ class MainWindow(QtWidgets.QMainWindow):
         _y, _Fs = y, Fs
 
     def play(self):
-        sd.play(_y, _Fs)
+        # samplerate = sd.query_devices(args.device, 'output')['default_samplerate']
+        # sd.play(_y, _Fs)
+        # with sd.OutputStream(device=args.device)
+        pgame.mixer.init(frequency=_Fs, size=-16, channels=2, buffer=4096)
+        sound0 = pgame.mixer.Sound(_filepath)
+        channel0 = pgame.mixer.Channel(0)
+        channel0.play(sound0)
+        channel0.set_volume(1.0, 0.0)
 
 
 def main():
-    # playSound(filepath)
-
 
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
     main.show()
     print(sd.query_devices())  # fix
     sys.exit(app.exec_())
+
 
 #     commented  the below out because of conflict to from qt to main
 #     filepath = askopenfilename()
@@ -109,7 +116,6 @@ def main():
 #     y, Fs, tt = readFile(filepath)
 
 #     y,Fs,tt = eng1.tGraph(filepath,nargout=3)
-
 
 
 if __name__ == "__main__":
