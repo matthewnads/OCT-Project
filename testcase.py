@@ -9,7 +9,6 @@ import sys
 import random
 import colorsys
 import sounddevice as sd
-import pygame as pgame
 
 eng1 = matlab.engine.start_matlab()
 
@@ -19,6 +18,9 @@ class MainWindow(QtWidgets.QMainWindow):
     _filepath = None
     _y = None
     _Fs = None
+    _dev, _names, _size = eng1.initOutput(nargout=3)
+    _inputDevs = None
+    _outputDevs = None
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -87,15 +89,16 @@ class MainWindow(QtWidgets.QMainWindow):
         _filepath = filepath
         _y, _Fs = y, Fs
 
-    def play(self):
+    def play(self):  # build out to support waveform.
+        print(self._size)
         # samplerate = sd.query_devices(args.device, 'output')['default_samplerate']
         # sd.play(_y, _Fs)
         # with sd.OutputStream(device=args.device)
-        pgame.mixer.init(frequency=_Fs, size=-16, channels=2, buffer=4096)
-        sound0 = pgame.mixer.Sound(_filepath)
-        channel0 = pgame.mixer.Channel(0)
-        channel0.play(sound0)
-        channel0.set_volume(1.0, 0.0)
+        # pgame.mixer.init(frequency=_Fs, size=-16, channels=2, buffer=4096)
+        # sound0 = pgame.mixer.Sound(_filepath)
+        # channel0 = pgame.mixer.Channel(0)
+        # channel0.play(sound0)
+        # channel0.set_volume(1.0, 0.0)
 
 
 def main():
@@ -103,7 +106,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
     main.show()
-    print(sd.query_devices())  # fix
+    # print(sd.query_devices())  # fix
     sys.exit(app.exec_())
 
 
