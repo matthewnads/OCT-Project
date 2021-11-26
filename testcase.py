@@ -18,7 +18,7 @@ class MainWindow(QtWidgets.QMainWindow):
     _filepath = None
     _y = None
     _Fs = None
-    _dev, _names, _size = eng1.initOutput(nargout=3)
+    _names, _dq, _channels = eng1.initOutput(nargout=3)
     _inputDevs = None
     _outputDevs = None
 
@@ -90,7 +90,7 @@ class MainWindow(QtWidgets.QMainWindow):
         _y, _Fs = y, Fs
 
     def play(self):  # build out to support waveform.
-        print(self._size)
+        print(self._channels)
         # samplerate = sd.query_devices(args.device, 'output')['default_samplerate']
         # sd.play(_y, _Fs)
         # with sd.OutputStream(device=args.device)

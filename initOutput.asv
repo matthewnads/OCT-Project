@@ -1,4 +1,4 @@
-function [names, dirdaq, channels] = initOutput()%return channels
+function [names, dirdaq] = initOutput()%return channels
     %dt = daqvendorlist;
     
     dirdaq = daq("directsound");
@@ -10,7 +10,7 @@ function [names, dirdaq, channels] = initOutput()%return channels
     size = height(dq);
 
     io = [];
-    idx = length(io);
+    idx = 1;
 
     for i = 1:size
         if contains(dev(i), "directsound") == 1
@@ -22,11 +22,10 @@ function [names, dirdaq, channels] = initOutput()%return channels
                 [io, idx] = addinput(dirdaq, dq.DeviceID(i), 1:2, "Audio");
                 names(idx) = dq.Model(i);
             end
-            idx = idx + 1;
+            idx = length(io) + 1;
         end
     end
     
-    names = rot90(names);
-    channels = dirdaq.Channels;
+    disp(names)
 
  end
