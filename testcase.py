@@ -90,7 +90,7 @@ class MainWindow(QtWidgets.QMainWindow):
         _y, _Fs = y, Fs
 
     def play(self):  # build out to support waveform.
-        print(self._channels)
+        print(self._channels.Type)
         # samplerate = sd.query_devices(args.device, 'output')['default_samplerate']
         # sd.play(_y, _Fs)
         # with sd.OutputStream(device=args.device)
