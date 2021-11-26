@@ -1,4 +1,4 @@
-function playSound(y, Fs) %select channel using bit numbers?
+function playSound(fName) %select channel using bit numbers?
     %select channel number(s)
     % - 
     %select which waveform for each type
@@ -12,7 +12,9 @@ function playSound(y, Fs) %select channel using bit numbers?
     %addoutput(d, "Audio5", "1", "Audio")% add channels
 
     %add channels
+
     
-    %[y,Fs] = audioread(fName);
-    sound(y,Fs)
+    
+    [y,Fs] = audioread(fName);
+    
 end
