@@ -9,7 +9,7 @@ function playSound(channel) %select channel
 
     Fs = 44000;
 
-    signal = createOutput(0, Fs);
+    signal = createOutput(0, Fs, 1);
     [names, dq, channels, devID, defMode] = initOutput(Fs);
 
     %addinput(dirdaq, devID, channels(1), defMode)

@@ -1,12 +1,46 @@
-function [output] = createOutput(type, fs, fName, sine_F, f0, f1) %params: fs, type, sine freq, stop time, f0, f1
+function [output] = createOutput(type, fs, StopTime, dtcycle, sine_F, f0, f1) 
+    % seconds StopTime
+
+    %main params: type, sampling frequency, amp, t-silence, t-ramp, offset
+    %optional args: duty cycle, pulse width (pulse), f0, f1 (chirp), sine 
 
     switch type
-        case 0 %tone
+        case 0 %pulse
+           if ~exist('dtcycle','var')
+                dtcycle = 50;
+           end
+           if ~exist('dtcycle','var')
+                dtcycle = 50;
+           end
+           dt = 1/fs;
+       
+           t = (0:dt:StopTime-dt)'; 
+           d = (0:)
+           output = pulstran(t,t,x);
+           plot(t, output);
+        case 1 %noise
+            lb = -1; %change
+            ub = 1; % 
+            samp = fs*StopTime;
+            output = lb + rand(1,samp)*(ub - lb);
+            output = rot90(output);
+        case 2 %chirp
+            if ~exist('f0','var')
+                f0 = 1000;
+            end
+            if ~exist('f1','var')
+                f1 = 20000;
+            end
+
+            dt = 1/fs;                   % seconds per sample
+            t = (0:dt:StopTime-dt)'; 
+            x = chirp(t,f0,t(end),f1);
+            output = x,fs;
+        case 3 %sine
             if ~exist('sine_F','var')
                 sine_F = 5000;
             end 
             dt = 1/fs;                   % seconds per sample
-            StopTime = 0.20;             % seconds
             t = (0:dt:StopTime-dt)';     % seconds
             F = sine_F;                    % Sine wave frequency (hertz)
             output = sin(2*pi*F*t);
@@ -24,24 +58,8 @@ function [output] = createOutput(type, fs, fName, sine_F, f0, f1) %params: fs, t
             end
               
             output=output.*env;
-        case 1 %chirp
-            if ~exist('f0','var')
-                f0 = 1000;
-            end
-            if ~exist('f0','var')
-                f1 = 20000;
-            end
-
-            dt = 1/fs;                   % seconds per sample
-            StopTime = 0.10;             % seconds
-            t = (0:dt:StopTime-dt)'; 
-            x = chirp(t,f0,t(end),f1);
-            output = x,fs;
-        case 2
-            if ~exist('fName','var')
-             % third parameter does not exist, so default it to something
-              fName = 'handel.wav';
-            end
-            [output, Fs] = audioread(fName);
+        
+        case 4 %periodic/square
+            
     end
 end
