@@ -9,7 +9,7 @@ function playSound(channel) %select channel
 
     Fs = 44000;
 
-    signal = createOutput(0, Fs, 1);
+    signal = createOutput(2, Fs, 1);
     [names, dq, channels, devID, defMode] = initOutput(Fs);
 
     %addinput(dirdaq, devID, channels(1), defMode)
@@ -18,6 +18,15 @@ function playSound(channel) %select channel
     
     %start(dq,"RepeatOutput")%repeat output
     
+
+    %dirdaq.NumDigitalTriggersPerRun = 1;
+    %dirdaq.DigitalTriggerTimeout = 60;
+
+    %addinput(dirdaq, devID, channels(1), defMode)
+    %addoutput(dirdaq, devID, channels(1), defMode)
+    %addoutput(dirdaq, devID, channels(2), defMode)
+
+    %trig = addtrigger(dirdaq, "Digital", "Start", "External", strcat(devId,"/PFI0"));
 
     write(dq, signal)
     %pause(1)
