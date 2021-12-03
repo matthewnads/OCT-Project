@@ -11,14 +11,13 @@ function [names, dirdaq, channels, devID, defMode] = initOutput(samp_Rate)%dirni
     %size = height(dq);
 
     %devID = dq.DeviceID(5);
-    DevID = dq.DeviceID(1);
+    devID = dq.DeviceID(1);
 
     %devInfo = dq.DeviceInfo(5);
     devInfo = dq.DeviceInfo(1);
 
     %channels = devInfo.Subsystems.ChannelNames
-    devInfo.Subystems
-    channels = devInfo.Subsystems(2).ChannelNames
+    channels = devInfo.Subsystems(2).ChannelNames;
     defMode = devInfo.Subsystems.DefaultMeasurementType;
 
     dirdaq.Rate = samp_Rate;

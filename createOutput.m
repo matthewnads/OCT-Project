@@ -15,7 +15,7 @@ function [output] = createOutput(type, fs, StopTime, dtcycle, sine_F, f0, f1)
            dt = 1/fs;
        
            t = (0:dt:StopTime-dt)'; 
-           d = (0:)
+           %d = (0:)
            output = pulstran(t,t,x);
            plot(t, output);
         case 1 %noise
