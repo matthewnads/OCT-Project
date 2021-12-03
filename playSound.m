@@ -1,4 +1,4 @@
-function playSound(fName, name, channel) %select channel using bit numbers?
+function playSound(channel) %select channel
     %select channel number(s)
     % - 
     %select which waveform for each type
@@ -7,18 +7,27 @@ function playSound(fName, name, channel) %select channel using bit numbers?
     %d = daq("ni"); %data acquisition object for NI-USB 6363
     %d = daq("directsound"); %Windows sound
 
-    [names, dq, channels] = initOutput()
+    Fs = 44000;
+
+    signal = createOutput(0, Fs);
+    [names, dq, channels, devID, defMode] = initOutput(Fs);
+
+    %addinput(dirdaq, devID, channels(1), defMode)
+    %addoutput(dirdaq, devID, channels(1), defMode)
+    addoutput(dq, devID, channels(channel), defMode);
     
-    %addoutput(d, "Audio5", "1", "Audio")% add channels
+    %start(dq,"RepeatOutput")%repeat output
+    
+
+    write(dq, signal)
+    %pause(1)
+    %stop(dq)
+
     %channels.Type
     %add channels    
-    
-    %[y,Fs] = audioread(fName);
 
-    %[road,fs]=audioread(fName);
-    %pad=zeros(length(road),1);     % blank channel
-    %left=[road(:,1),pad];       % add blank channel so right is silent
-    %right=[pad,road(:,1)];     % add blank channel so left is silent
-    %soundsc(left,fs)       % sound only from left
-    %soundsc(right,fs)    % sound only from right
+
+    
+    %
+
 end
