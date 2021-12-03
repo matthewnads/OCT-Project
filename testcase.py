@@ -59,8 +59,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.playW = None
         self.setWindowTitle("Generator and Editor")
 
+        self.layout = QtWidgets.QV
         self.graphWidget = pg.PlotWidget()
         self.graphWidget.setBackground("w")
+
+
+
+
 
         self.setCentralWidget(self.graphWidget)
 
