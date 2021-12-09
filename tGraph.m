@@ -13,8 +13,14 @@ function tGraph()
                 
     %define envelope
     % env = ones(length(tone),1);
-   
-    output = pulstran(t,offset,'rectpuls',fs);
 
-    plot(t, output)
+    period = StopTime/10;
+    pulses = ceil(StopTime/period);
+
+    dutycycle = 0.5;
+
+    x = amp*square(2*pi*F*t);
+
+    plot(t,x)
+    xlabel('t / \pi')
 end
