@@ -1,15 +1,5 @@
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import (
-    QComboBox,
-    QMainWindow,
-    QAction,
-    QWidget,
-    qApp,
-    QApplication,
-    QPushButton,
-    QLabel,
-    QVBoxLayout,
-)
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtWidgets import QMainWindow, QAction, qApp, QApplication
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
 import matlab.engine
@@ -20,50 +10,68 @@ import random
 import colorsys
 
 eng1 = matlab.engine.start_matlab()
+generateWindow = None
+signal_frequency = 0
+signal_amplitude = 0
+t_silence = 0
+t_ramp = 0
+offset = 0
+sampling_frequency = 0
 
 
-class WaveformWindow(QWidget):
-    _inputDevs = None
-    _outputDevs = None
-    _filepath = None
-    _y = None
-    _Fs = None
-    _output = None
-    # _names, _dq, _channels = eng1.initOutput(nargout=3)
+# Dynamic Window Layouts
 
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Waveform Creator")
-        # layout.addWidget(self.label)
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-        self.waveform = QComboBox()
-        self.waveform.addItems(["Sine", "Chirp", "Sound File"])
-        layout.addWidget(self.waveform)
-        self.waveform.activated.connect(self.waveSelect)
 
-    def waveSelect(self, idx):
-        global _output
-        _output = eng1.createOutput(idx)
+# self.dynamic_menu = QtWidgets.QGridLayout()
+# self.dynamic_menu_box = QtWidgets.QGroupBox()
+# self.dynamic_menu_box.hide()
+# self.dynamic_menu_box.setLayout(self.dynamic_menu)
 
-    # def dynamicMenu(self):
+# self.top_inputs_box = QtWidgets.QGroupBox()
+# self.top_inputs_box.setLayout(self.top_inputs)
+# self.mainLayout.addWidget(self.top_inputs_box)
+# self.mainLayout.addWidget(self.dynamic_menu_box)
+# self.setLayout(self.mainLayout)
 
 
 class MainWindow(QtWidgets.QMainWindow):
+
     _filepath = None
-    _y = None
-    _Fs = None
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        self.playW = None
-        self.setWindowTitle("Generator and Editor")
 
+        self.setWindowTitle("Generator and Editor")
+        # main layout (components get added to this)
+        self.mainLayout = QtWidgets.QVBoxLayout()
+
+        # --------------------------------------------------------------------
+        # Graph Widget
         self.graphWidget = pg.PlotWidget()
         self.graphWidget.setBackground("w")
 
-        self.setCentralWidget(self.graphWidget)
+        # --------------------------------------------------------------------
+        # Paramter textboxes
 
+        # NOTES NOV19
+        # sampling rate, duration, amplitude  (voltage for DAQ), type of signal (periodic wave, sin, chirp, noise, white noise, pulse)
+        # silent spaces before and after the sound, ramp up duration/ ramp down duration (number of seconds for each)
+        # duration = seconds , then number of samples based off of sampling frequency and duration
+        # think about averages ...
+        # corrections/alterations to the waveform
+        # want it coming out of daq board
+        # number of reps (dont show all reps)
+        # multichannel
+
+        self.central = QtWidgets.QWidget(self)
+        self.central.setFocus()
+        # ------------------------------------------------------------------------
+        # add widgets to main layout
+
+        self.mainLayout.addWidget(self.graphWidget)
+
+        self.setCentralWidget(self.central)
+        self.central.setLayout(self.mainLayout)
         self.defineToolbar()
 
     def plottingFig(self, y, Fs, tt, graphWidget):
@@ -94,9 +102,11 @@ class MainWindow(QtWidgets.QMainWindow):
         fileButton.setShortcut("Ctrl+O")
         fileButton.triggered.connect(self.getFiles)
         self.toolbar.addAction(fileButton)
-        waveformButton = QAction("Create Waveform", self)
-        waveformButton.triggered.connect(self.waveform)
-        self.toolbar.addAction(waveformButton)
+
+        generateButton = QAction("Generate", self)
+        generateButton.triggered.connect(self.generate)
+        self.toolbar.addAction(generateButton)
+
         playButton = QAction("Play", self)
         playButton.triggered.connect(self.play)
         self.toolbar.addAction(playButton)
@@ -106,6 +116,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.toolbar.addAction(graphButton)
 
         # print("filepath:", self.filepath)
+
+    def button1(self):
+        print("this is button one")
 
     def getFiles(self):
         filepath, _ = QtWidgets.QFileDialog.getOpenFileName(
@@ -118,48 +131,160 @@ class MainWindow(QtWidgets.QMainWindow):
         # y = y / 32768.0
         # tt = len(y)/float(Fs)
         y, Fs, tt = eng1.tGraph(filepath, nargout=3)
-
         self.plottingFig(y, Fs, tt, self.graphWidget)
-        global _filepath, _y, _Fs
+        global _filepath
         _filepath = filepath
-        _y, _Fs = y, Fs
 
-    def waveform(self):
-        if self.playW is None:
-            self.playW = WaveformWindow()
-        self.playW.show()
+    def play(self):
+        eng1.playSound(_filepath, nargout=0)
 
-    def play(self):  # build out to support waveform.
-        print("Play something")
+    def generate(self):
+        global generateWindow
+        generateWindow.show()
 
-        # samplerate = sd.query_devices(args.device, 'output')['default_samplerate']
-        # sd.play(_y, _Fs)
-        # with sd.OutputStream(device=args.device)
-        # pgame.mixer.init(frequency=_Fs, size=-16, channels=2, buffer=4096)
-        # sound0 = pgame.mixer.Sound(_filepath)
-        # channel0 = pgame.mixer.Channel(0)
-        # channel0.play(sound0)
-        # channel0.set_volume(1.0, 0.0)
+
+class GenerateWindow(QtWidgets.QWidget):
+    def __init__(self, *args, **kwargs):
+        super(GenerateWindow, self).__init__(*args, **kwargs)
+
+        self.mainLayout = QtWidgets.QVBoxLayout()
+        self.top_inputs = QtWidgets.QGridLayout()
+
+        self.signals_label = QtWidgets.QLabel("Signal Type:")
+        self.signals = QtWidgets.QComboBox()
+        # self.signals.insertAtTop("Please select a signal")
+        self.signals.insertItem(0, "Periodic")
+        self.signals.insertItem(0, "Sin")
+        self.signals.insertItem(0, "Chirp")
+        self.signals.insertItem(0, "Noise")
+        self.signals.insertItem(0, "Pulse")
+        self.top_inputs.addWidget(self.signals_label, 0, 0)
+        self.top_inputs.addWidget(self.signals, 0, 1)
+        self.signals.currentIndexChanged.connect(
+            lambda: change(str(self.signals.currentText()), self.sin_box)
+        )  # USE THIS TO PASS THE COMBOBOX INTO THE FUNCTION ARGUMENT - USE THAT FOR DYNAMIC MENU CHANGES ON CHANGE
+
+        # NOTES –
+        # Tsilence, tramp = ms
+        # Freq khz
+        # Amp volts
+        # offset = 0 default, read only volts
+        # send generated waves to spescific channels in generate menu
+        # number of repeeated sounds -> called number of averages
+        # floats for all except number reps
+        # multiple graphs - stack them
+
+        self.signals_label = QtWidgets.QLabel("Signal Frequency:")
+        self.signals_unit = QtWidgets.QLabel("kHz")
+        self.signal_freq = QtWidgets.QLineEdit()
+        int_validator = QtGui.QDoubleValidator(0, 10000, 4)
+        self.signal_freq.setValidator(int_validator)
+        self.top_inputs.addWidget(self.signals_label, 1, 0)
+        self.top_inputs.addWidget(self.signal_freq, 1, 1)
+        self.top_inputs.addWidget(self.signals_unit, 1, 2)
+
+        self.signals_label = QtWidgets.QLabel("Signal Amplitude:")
+        self.signal_amp = QtWidgets.QLineEdit()
+        self.signals_unit = QtWidgets.QLabel("V")
+        self.signal_amp.setValidator(int_validator)
+        self.top_inputs.addWidget(self.signals_label, 2, 0)
+        self.top_inputs.addWidget(self.signal_amp, 2, 1)
+        self.top_inputs.addWidget(self.signals_unit, 2, 2)
+
+        self.signals_label = QtWidgets.QLabel("T-silence:")
+        self.signal_silence = QtWidgets.QLineEdit()
+        self.signals_unit = QtWidgets.QLabel("ms")
+        self.signal_silence.setValidator(int_validator)
+        self.top_inputs.addWidget(self.signals_label, 3, 0)
+        self.top_inputs.addWidget(self.signal_silence, 3, 1)
+        self.top_inputs.addWidget(self.signals_unit, 3, 2)
+
+        self.signals_label = QtWidgets.QLabel("T-ramp:")
+        self.signal_tramp = QtWidgets.QLineEdit()
+        self.signals_unit = QtWidgets.QLabel("ms")
+        self.signal_tramp.setValidator(int_validator)
+        self.top_inputs.addWidget(self.signals_label, 4, 0)
+        self.top_inputs.addWidget(self.signal_tramp, 4, 1)
+        self.top_inputs.addWidget(self.signals_unit, 4, 2)
+
+        self.signals_label = QtWidgets.QLabel("Offset:")
+        self.signal_offset = QtWidgets.QLineEdit()
+        self.signal_offset.setReadOnly(True)
+        self.signals_unit = QtWidgets.QLabel("V")
+        self.signal_offset.setValidator(int_validator)
+        self.top_inputs.addWidget(self.signals_label, 5, 0)
+        self.top_inputs.addWidget(self.signal_offset, 5, 1)
+        self.top_inputs.addWidget(self.signals_unit, 5, 2)
+
+        # #pulse dynamic menu
+        # self.pulse_box = QtWidgets.QGroupBox()
+        # self.pulse_layout= QtWidgets.QGridLayout()
+        # label = QtWidgets.QLabel("Duty Cycle:")
+        # duty_cycle = QtWidgets.QLineEdit()
+        # int_validator= QtGui.QIntValidator(0,10000)
+        # duty_cycle.setValidator(int_validator)
+        # self.pulse_layout.addWidget(label,6,0)
+        # self.pulse_layout.addWidget(duty_cycle,6,1)
+        # self.pulse_box.setLayout(self.pulse_layout)
+
+        # sin dynamic menu
+        self.sin_box = QtWidgets.QGroupBox()
+        self.sin_layout = QtWidgets.QGridLayout()
+        label = QtWidgets.QLabel("Sampling Frequency:")
+        frequency = QtWidgets.QLineEdit()
+        self.signals_unit = QtWidgets.QLabel("kHz")
+        int_validator = QtGui.QIntValidator(0, 10000)
+        frequency.setValidator(int_validator)
+        self.sin_layout.addWidget(label, 6, 0)
+        self.sin_layout.addWidget(frequency, 6, 1)
+        self.sin_layout.addWidget(self.signals_unit, 6, 2)
+        self.sin_box.setLayout(self.sin_layout)
+
+        self.confirm = QtWidgets.QPushButton("Ok")
+        self.confirm.clicked.connect(lambda: self.createWaveform())
+
+        self.top_inputs_box = QtWidgets.QGroupBox()
+        self.top_inputs_box.setLayout(self.top_inputs)
+        self.mainLayout.addWidget(self.top_inputs_box)
+        # self.mainLayout.addWidget(self.pulse_box)
+        self.mainLayout.addWidget(self.sin_box)
+        self.mainLayout.addWidget(self.confirm)
+        self.sin_box.hide()
+        # self.pulse_box.hide()
+        self.setLayout(self.mainLayout)
+
+    def createWaveform(self):
+        # print(self.signals.currentIndex())
+        # main params: type, sampling frequency (khz), amp (v), tsilence (ms), t-ramp (ms), offset (0 default, in volts), stop time (s)
+        # optional args: duty cycle, period, f0, f1 (chirp), sine
+        self.output = eng1.createOutput(
+            self.signals.currentIndex,
+        )
+        self.close()
+
+
+def change(text, sin):
+    if text == "Sin":
+        # pulse.hide()
+        sin.show()
+    else:
+        # pulse.hide()
+        sin.hide()
 
 
 def main():
+    # playSound(filepath)
 
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
     main.show()
-    # print(sd.query_devices())  # fix
+    global generateWindow
+    generateWindow = GenerateWindow()
     sys.exit(app.exec_())
 
 
-#     commented  the below out because of conflict to from qt to main
-#     filepath = askopenfilename()
-#     print(filepath)
-
-#     # playSound()
-
-#     y, Fs, tt = readFile(filepath)
-
-#     y,Fs,tt = eng1.tGraph(filepath,nargout=3)
+def playSound(eng1):
+    eng1.playSound(nargout=0)
 
 
 if __name__ == "__main__":

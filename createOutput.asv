@@ -1,4 +1,4 @@
-function [output] = createOutput(type, fs, tsil, tramp, StopTime, amp, offset, period, sine_F, f0, f1, square_F) 
+function [output] = createOutput(type, fs, amp, tsil, tramp, offset, StopTime, period, sine_F, f0, f1, square_F) 
     % seconds StopTime
 
     %main params: type, sampling frequency (khz), amp (v), tsilence (ms),
@@ -14,6 +14,7 @@ function [output] = createOutput(type, fs, tsil, tramp, StopTime, amp, offset, p
     if ~exist('amp','var')
         amp = 1;
     end
+    if ~exist('StopTime')
 
     switch type
         case 0 %pulse

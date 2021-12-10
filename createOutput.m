@@ -1,8 +1,8 @@
-function [output] = createOutput(type, fs, tsil, tramp, StopTime, amp, offset, period, sine_F, f0, f1, square_F) 
+function [output] = createOutput(type, fs, amp, tsil, tramp, offset, StopTime, period, sine_F, f0, f1, square_F) 
     % seconds StopTime
 
     %main params: type, sampling frequency (khz), amp (v), tsilence (ms),
-    %t-ramp (ms), offset (0 default, in volts)
+    %t-ramp (ms), offset (0 default, in volts), stop time (s)
     %optional args: duty cycle, period, f0, f1 (chirp), sine 
 
     dt = 1/fs;                   % seconds per sample
@@ -13,6 +13,9 @@ function [output] = createOutput(type, fs, tsil, tramp, StopTime, amp, offset, p
     end
     if ~exist('amp','var')
         amp = 1;
+    end
+    if ~exist('StopTime', 'var')
+        StopTime = 1;
     end
 
     switch type

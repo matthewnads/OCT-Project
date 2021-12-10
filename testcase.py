@@ -254,7 +254,12 @@ class GenerateWindow(QtWidgets.QWidget):
         self.setLayout(self.mainLayout)
 
     def createWaveform(self):
-        print(self.signal_freq.text())
+        # print(self.signals.currentIndex())
+        # main params: type, sampling frequency (khz), amp (v), tsilence (ms), t-ramp (ms), offset (0 default, in volts), stop time (s)
+        # optional args: duty cycle, period, f0, f1 (chirp), sine
+        self.output = eng1.createOutput(
+            self.signals.currentIndex,
+        )
         self.close()
 
 
