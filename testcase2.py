@@ -11,6 +11,12 @@ import colorsys
 
 eng1 = matlab.engine.start_matlab()
 generateWindow = None
+signal_frequency = 0 
+signal_amplitude = 0  
+t_silence = 0 
+t_ramp =0 
+offset = 0
+sampling_frequency = 0
 
 
 #Dynamic Window Layouts
@@ -144,6 +150,7 @@ class GenerateWindow(QtWidgets.QWidget):
         
         self.signals_label = QtWidgets.QLabel("Signal Type:")
         self.signals = QtWidgets.QComboBox()
+        # self.signals.insertAtTop("Please select a signal")
         self.signals.insertItem(0,"Periodic")
         self.signals.insertItem(0,"Sin")
         self.signals.insertItem(0,"Chirp")
@@ -151,86 +158,111 @@ class GenerateWindow(QtWidgets.QWidget):
         self.signals.insertItem(0,"Pulse")
         self.top_inputs.addWidget(self.signals_label,0,0)
         self.top_inputs.addWidget(self.signals,0,1)
-        self.signals.currentIndexChanged.connect(lambda: change(str(self.signals.currentText()),self.pulse_box,self.sin_box)) # USE THIS TO PASS THE COMBOBOX INTO THE FUNCTION ARGUMENT - USE THAT FOR DYNAMIC MENU CHANGES ON CHANGE 
+        self.signals.currentIndexChanged.connect(lambda: change(str(self.signals.currentText()),self.sin_box)) # USE THIS TO PASS THE COMBOBOX INTO THE FUNCTION ARGUMENT - USE THAT FOR DYNAMIC MENU CHANGES ON CHANGE 
         
+        
+        
+# NOTES – 
+# Tsilence, tramp = ms
+# Freq khz
+# Amp volts 
+# offset = 0 default, read only volts
+# send generated waves to spescific channels in generate menu 
+#number of repeeated sounds -> called number of averages 
+#floats for all except number reps 
+#multiple graphs - stack them 
+
         
         self.signals_label = QtWidgets.QLabel("Signal Frequency:")
+        self.signals_unit = QtWidgets.QLabel("kHz")
         self.signal_freq = QtWidgets.QLineEdit()
-        int_validator= QtGui.QIntValidator(0,10000)
+        int_validator= QtGui.QDoubleValidator(0,10000,4)
         self.signal_freq.setValidator(int_validator)
         self.top_inputs.addWidget(self.signals_label,1,0)
         self.top_inputs.addWidget(self.signal_freq,1,1)
+        self.top_inputs.addWidget(self.signals_unit,1,2)
         
         self.signals_label = QtWidgets.QLabel("Signal Amplitude:")
         self.signal_amp = QtWidgets.QLineEdit()
+        self.signals_unit = QtWidgets.QLabel("V")
         self.signal_amp.setValidator(int_validator)
         self.top_inputs.addWidget(self.signals_label,2,0)
         self.top_inputs.addWidget(self.signal_amp,2,1)
+        self.top_inputs.addWidget(self.signals_unit,2,2)
         
         self.signals_label = QtWidgets.QLabel("T-silence:")
         self.signal_silence = QtWidgets.QLineEdit()
+        self.signals_unit = QtWidgets.QLabel("ms")
         self.signal_silence.setValidator(int_validator)
         self.top_inputs.addWidget(self.signals_label,3,0)
         self.top_inputs.addWidget(self.signal_silence,3,1)
+        self.top_inputs.addWidget(self.signals_unit,3,2)
         
         self.signals_label = QtWidgets.QLabel("T-ramp:")
         self.signal_tramp = QtWidgets.QLineEdit()
+        self.signals_unit = QtWidgets.QLabel("ms")
         self.signal_tramp.setValidator(int_validator)
         self.top_inputs.addWidget(self.signals_label,4,0)
         self.top_inputs.addWidget(self.signal_tramp,4,1)
+        self.top_inputs.addWidget(self.signals_unit,4,2)
         
         self.signals_label = QtWidgets.QLabel("Offset:")
         self.signal_offset = QtWidgets.QLineEdit()
+        self.signal_offset.setReadOnly(True)
+        self.signals_unit = QtWidgets.QLabel("V") 
         self.signal_offset.setValidator(int_validator)
         self.top_inputs.addWidget(self.signals_label,5,0)
         self.top_inputs.addWidget(self.signal_offset,5,1)
+        self.top_inputs.addWidget(self.signals_unit,5,2)
         
-        
-        #pulse dynamic menu
-        self.pulse_box = QtWidgets.QGroupBox() 
-        self.pulse_layout= QtWidgets.QGridLayout() 
-        label = QtWidgets.QLabel("Duty Cycle:")
-        duty_cycle = QtWidgets.QLineEdit()
-        int_validator= QtGui.QIntValidator(0,10000)
-        duty_cycle.setValidator(int_validator)
-        self.pulse_layout.addWidget(label,6,0)
-        self.pulse_layout.addWidget(duty_cycle,6,1)
-        self.pulse_box.setLayout(self.pulse_layout)
+        # #pulse dynamic menu
+        # self.pulse_box = QtWidgets.QGroupBox() 
+        # self.pulse_layout= QtWidgets.QGridLayout() 
+        # label = QtWidgets.QLabel("Duty Cycle:")
+        # duty_cycle = QtWidgets.QLineEdit()
+        # int_validator= QtGui.QIntValidator(0,10000)
+        # duty_cycle.setValidator(int_validator)
+        # self.pulse_layout.addWidget(label,6,0)
+        # self.pulse_layout.addWidget(duty_cycle,6,1)
+        # self.pulse_box.setLayout(self.pulse_layout)
         
         
         #sin dynamic menu        
         self.sin_box = QtWidgets.QGroupBox() 
         self.sin_layout= QtWidgets.QGridLayout() 
-        label = QtWidgets.QLabel("Frequency:")
+        label = QtWidgets.QLabel("Sampling Frequency:")
         frequency = QtWidgets.QLineEdit()
+        self.signals_unit = QtWidgets.QLabel("kHz")
         int_validator= QtGui.QIntValidator(0,10000)
         frequency.setValidator(int_validator)
         self.sin_layout.addWidget(label,6,0)
         self.sin_layout.addWidget(frequency,6,1)
+        self.sin_layout.addWidget(self.signals_unit,6,2)
         self.sin_box.setLayout(self.sin_layout)
+        
+        
+        self.confirm = QtWidgets.QPushButton("Ok")
+        
+      
         
         self.top_inputs_box = QtWidgets.QGroupBox() 
         self.top_inputs_box.setLayout(self.top_inputs)
         self.mainLayout.addWidget(self.top_inputs_box)
-        self.mainLayout.addWidget(self.pulse_box)
+        # self.mainLayout.addWidget(self.pulse_box)
         self.mainLayout.addWidget(self.sin_box)
+        self.mainLayout.addWidget(self.confirm)
         self.sin_box.hide() 
-        self.pulse_box.hide()
+        # self.pulse_box.hide()
         self.setLayout(self.mainLayout)
         
 
         
-def change(text,pulse,sin): 
-    
-    if(text=="Pulse"):
-        pulse.show()
-        sin.hide()
-        
-    elif(text=="Sin"): 
-        pulse.hide()
+def change(text,sin): 
+    if(text=="Sin"): 
+        # pulse.hide()
         sin.show()
     else: 
-        pulse.hide()
+        # pulse.hide()
         sin.hide()
         
 def main():
