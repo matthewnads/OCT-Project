@@ -158,7 +158,7 @@ class GenerateWindow(QtWidgets.QWidget):
         self.signals.insertItem(0,"Pulse")
         self.top_inputs.addWidget(self.signals_label,0,0)
         self.top_inputs.addWidget(self.signals,0,1)
-        self.signals.currentIndexChanged.connect(lambda: change(str(self.signals.currentText()),self.sin_box)) # USE THIS TO PASS THE COMBOBOX INTO THE FUNCTION ARGUMENT - USE THAT FOR DYNAMIC MENU CHANGES ON CHANGE 
+        self.signals.currentIndexChanged.connect(lambda: change(str(self.signals.currentText()),self.sin_box,self.chirp_box)) # USE THIS TO PASS THE COMBOBOX INTO THE FUNCTION ARGUMENT - USE THAT FOR DYNAMIC MENU CHANGES ON CHANGE 
         
         
         
@@ -173,7 +173,7 @@ class GenerateWindow(QtWidgets.QWidget):
 #multiple graphs - stack them 
 
         
-        self.signals_label = QtWidgets.QLabel("Signal Frequency:")
+        self.signals_label = QtWidgets.QLabel("Sampling Frequency:")
         self.signals_unit = QtWidgets.QLabel("kHz")
         self.signal_freq = QtWidgets.QLineEdit()
         int_validator= QtGui.QDoubleValidator(0,10000,4)
@@ -215,25 +215,40 @@ class GenerateWindow(QtWidgets.QWidget):
         self.top_inputs.addWidget(self.signal_offset,5,1)
         self.top_inputs.addWidget(self.signals_unit,5,2)
         
-        # #pulse dynamic menu
-        # self.pulse_box = QtWidgets.QGroupBox() 
-        # self.pulse_layout= QtWidgets.QGridLayout() 
-        # label = QtWidgets.QLabel("Duty Cycle:")
-        # duty_cycle = QtWidgets.QLineEdit()
-        # int_validator= QtGui.QIntValidator(0,10000)
-        # duty_cycle.setValidator(int_validator)
-        # self.pulse_layout.addWidget(label,6,0)
-        # self.pulse_layout.addWidget(duty_cycle,6,1)
-        # self.pulse_box.setLayout(self.pulse_layout)
+        self.signals_label = QtWidgets.QLabel("Number of Reps:")
+        self.signal_freq = QtWidgets.QLineEdit()
+        rep_validator= QtGui.QIntValidator(1,1000000)
+        self.signal_freq.setValidator(rep_validator)
+        self.top_inputs.addWidget(self.signals_label,6,0)
+        self.top_inputs.addWidget(self.signal_freq,6,1)
+        self.top_inputs.addWidget(self.signals_unit,6,2)
+        
+        #start f0 and end f2 dynamic menu
+        self.chirp_box = QtWidgets.QGroupBox() 
+        self.chirp_layout= QtWidgets.QGridLayout() 
+        label = QtWidgets.QLabel("Start Frequency:")
+        f0 = QtWidgets.QLineEdit()
+        f0.setValidator(int_validator)
+        f0units = QtWidgets.QLabel("kHz")
+        labelf1 = QtWidgets.QLabel("End Frequency:")
+        f1 =  QtWidgets.QLineEdit()
+        f1.setValidator(int_validator)
+        f1units = QtWidgets.QLabel("kHz")
+        self.chirp_layout.addWidget(label,7,0)
+        self.chirp_layout.addWidget(f0,7,1)
+        self.chirp_layout.addWidget(f0units,7,2)
+        self.chirp_layout.addWidget(labelf1,8,0)
+        self.chirp_layout.addWidget(f1,8,1)
+        self.chirp_layout.addWidget(f1units,8,2)
+        self.chirp_box.setLayout(self.chirp_layout)
         
         
         #sin dynamic menu        
         self.sin_box = QtWidgets.QGroupBox() 
         self.sin_layout= QtWidgets.QGridLayout() 
-        label = QtWidgets.QLabel("Sampling Frequency:")
+        label = QtWidgets.QLabel("Signal Frequency:")
         frequency = QtWidgets.QLineEdit()
         self.signals_unit = QtWidgets.QLabel("kHz")
-        int_validator= QtGui.QIntValidator(0,10000)
         frequency.setValidator(int_validator)
         self.sin_layout.addWidget(label,6,0)
         self.sin_layout.addWidget(frequency,6,1)
@@ -241,28 +256,34 @@ class GenerateWindow(QtWidgets.QWidget):
         self.sin_box.setLayout(self.sin_layout)
         
         
-        self.confirm = QtWidgets.QPushButton("Ok")
+        self.confirm = QtWidgets.QPushButton("Generate")
         
       
         
         self.top_inputs_box = QtWidgets.QGroupBox() 
         self.top_inputs_box.setLayout(self.top_inputs)
         self.mainLayout.addWidget(self.top_inputs_box)
-        # self.mainLayout.addWidget(self.pulse_box)
+        self.mainLayout.addWidget(self.chirp_box)
         self.mainLayout.addWidget(self.sin_box)
         self.mainLayout.addWidget(self.confirm)
         self.sin_box.hide() 
-        # self.pulse_box.hide()
+        self.chirp_box.hide()
         self.setLayout(self.mainLayout)
         
 
         
-def change(text,sin): 
+def change(text,sin,chirp): 
     if(text=="Sin"): 
-        # pulse.hide()
+        chirp.hide()
         sin.show()
+    elif(text=="Chirp"):
+        chirp.show()
+        sin.hide()
+    elif(text=="Periodic"):
+        chirp.show()
+        sin.hide()
     else: 
-        # pulse.hide()
+        chirp.hide()
         sin.hide()
         
 def main():
