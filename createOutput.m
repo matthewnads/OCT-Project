@@ -1,4 +1,4 @@
-function [output] = createOutput(type, fs, tsil, tramp, StopTime, amp, offset, dtcycle, period, sine_F, f0, f1, square_F) 
+function [output] = createOutput(type, fs, tsil, tramp, StopTime, amp, offset, period, sine_F, f0, f1, square_F) 
     % seconds StopTime
 
     %main params: type, sampling frequency (khz), amp (v), tsilence (ms),
@@ -54,6 +54,7 @@ function [output] = createOutput(type, fs, tsil, tramp, StopTime, amp, offset, d
             output = sin(2*pi*F*t);
         
         case 4 %periodic/square
+            %???? not right
             if ~exist('square_F','var')
                 square_F = 5000;
             end
