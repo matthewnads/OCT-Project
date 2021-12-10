@@ -11,23 +11,17 @@ function [names, dirdaq, channels, devID, defMode] = initOutput(samp_Rate)%dirni
     %size = height(dq);
 
     devID = dq.DeviceID(5);
-    %DevID = dq.DeviceID(1);
+    %devID = dq.DeviceID(1);
 
-    devInfo = dq.DeviceInfo(5);
-    %devInfo = dqDeviceInfo(1);
+    devInfo = dq.DeviceInfo(5)
+    %devInfo = dq.DeviceInfo(1);
 
     channels = devInfo.Subsystems.ChannelNames;
+    %channels = devInfo.Subsystems(2).ChannelNames;
     defMode = devInfo.Subsystems.DefaultMeasurementType;
 
     dirdaq.Rate = samp_Rate;
-    %dirdaq.NumDigitalTriggersPerRun = 1;
-    %dirdaq.DigitalTriggerTimeout = 60;
-
-    %addinput(dirdaq, devID, channels(1), defMode)
-    %addoutput(dirdaq, devID, channels(1), defMode)
-    %addoutput(dirdaq, devID, channels(2), defMode)
-
-    %trig = addtrigger(dirdaq, "Digital", "Start", "External", strcat(devId,"/PFI0"));
+    
 
     %dq.DeviceInfo.Subsystems
 

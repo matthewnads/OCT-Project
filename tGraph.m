@@ -1,15 +1,26 @@
-function [y,Fs,tt] = tGraph(fName)
+function tGraph()
+    sine_F = 5000;
+    fs = 44000;
+    amp= 2;
+    StopTime = 0.1;
+    offset = 1;
+    dt = 1/fs;                   % seconds per sample
+    t = (0:dt:StopTime-dt)';     % seconds
+    tramp = StopTime/3;
+    tsil = StopTime/9;
+    F = sine_F;                    % Sine wave frequency (hertz)
+    output = amp*sin(2*pi*F*t);
+                
+    %define envelope
+    % env = ones(length(tone),1);
 
-    [y,Fs] = audioread(fName);
-    
-    info = audioinfo(fName);
+    period = StopTime/10;
+    pulses = ceil(StopTime/period);
 
-    tt = info.Duration;
+    dutycycle = 0.5;
 
-    t = 0:seconds(1/Fs):seconds(info.Duration);
-    t = t(1:end-1);
-    
-    %plot(t,y)
-    %xlabel('Time')
-    %ylabel('Audio Signal')
+    x = amp*square(2*pi*F*t);
+
+    plot(t,x)
+    xlabel('t / \pi')
 end
