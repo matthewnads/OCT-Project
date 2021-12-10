@@ -5,6 +5,10 @@ function [output] = createOutput(type, fs, amp, tsil, tramp, offset, StopTime, p
     %t-ramp (ms), offset (0 default, in volts), stop time (s)
     %optional args: duty cycle, period, f0, f1 (chirp), sine 
 
+    fs = fs*1000;
+    tramp = tramp/1000;
+    tsil = tsil/1000;
+
     dt = 1/fs;                   % seconds per sample
     t = (0:dt:StopTime-dt)';
 
