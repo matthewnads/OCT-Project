@@ -11,29 +11,14 @@ import colorsys
 
 eng1 = matlab.engine.start_matlab()
 generateWindow = None
+#set up these global variables so that we can send them to the backend later on (never ended up getting to that point)
+#the idea is that we use these variables to construct our wave patterns in matlab 
 signal_frequency = 0 
 signal_amplitude = 0  
 t_silence = 0 
 t_ramp =0 
 offset = 0
 sampling_frequency = 0
-
-
-#Dynamic Window Layouts
-
-
-     
-        # self.dynamic_menu = QtWidgets.QGridLayout()
-        # self.dynamic_menu_box = QtWidgets.QGroupBox()
-        # self.dynamic_menu_box.hide()
-        # self.dynamic_menu_box.setLayout(self.dynamic_menu)
-     
-        # self.top_inputs_box = QtWidgets.QGroupBox() 
-        # self.top_inputs_box.setLayout(self.top_inputs)
-        # self.mainLayout.addWidget(self.top_inputs_box)
-        # self.mainLayout.addWidget(self.dynamic_menu_box)
-        # self.setLayout(self.mainLayout)
-
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -43,7 +28,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
 
         self.setWindowTitle("Generator and Editor")
-        #main layout (components get added to this)
+        #The mainLayout is the layout of the our main window. 
         self.mainLayout = QtWidgets.QVBoxLayout()
         
        
@@ -55,21 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         
         #--------------------------------------------------------------------
-        #Paramter textboxes
-        
-        
-        #NOTES NOV19
-        # sampling rate, duration, amplitude  (voltage for DAQ), type of signal (periodic wave, sin, chirp, noise, white noise, pulse)
-        # silent spaces before and after the sound, ramp up duration/ ramp down duration (number of seconds for each)
-        #duration = seconds , then number of samples based off of sampling frequency and duration
-        # think about averages ...
-        #corrections/alterations to the waveform 
-        #want it coming out of daq board 
-        #number of reps (dont show all reps) 
-        #multichannel 
-        
-        
-        
+        #this is our central widget. mainLayout will get added to the central widget which makes up our window 
         self.central = QtWidgets.QWidget(self)
         self.central.setFocus() 
         # ------------------------------------------------------------------------
@@ -91,7 +62,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphWidget.setLabel('bottom', "<span style=\"color:black;font-size:20px\">Time (Seconds)</span>")
         graphWidget.plot(t, y, pen=pg.mkPen(color=(r, g, b)))
 
-
+    # ------------------------------------------------------------------------
+    #function to define toolbar 
     def defineToolbar(self):
         self.toolbar = QtWidgets.QToolBar()
         self.addToolBar(self.toolbar)
@@ -108,49 +80,52 @@ class MainWindow(QtWidgets.QMainWindow):
         playButton=QAction("Play",self)
         playButton.triggered.connect(self.play)
         self.toolbar.addAction(playButton)
-        #graphButton = QAction("Graph", self)
-        #graphButton.setShortcut('Ctrl+O')
-        #graphButton.triggered.connect(self.plottingFig(self.graphWidget))
-        #self.toolbar.addAction(graphButton)
-
-        #print("filepath:", self.filepath)
-        
+    #   ------------------------------------------------------------------------
+    #this was a function i used for testing buttons 
     def button1(self): 
         print("this is button one")
+        
+    #   ------------------------------------------------------------------------
+    #used to get and read files from the "file" toolbar button 
     def getFiles(self):
         filepath, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Single File', QtCore.QDir.rootPath(), '*.wav')
         self.readFile(filepath)
 
     def readFile(self, filepath):
-        #Fs, y = wav.read(filepath)
-        #y = y / 32768.0
-        #tt = len(y)/float(Fs)
+
         y, Fs, tt = eng1.tGraph(filepath, nargout=3)
         self.plottingFig(y, Fs, tt, self.graphWidget)
         global _filepath
         _filepath = filepath 
         
-        
+    ##   ------------------------------------------------------------------------
+    #calls the matlab playsound function 
     def play(self):
         eng1.playSound(_filepath,nargout=0)
-        
+    #   ------------------------------------------------------------------------    
+    #this function opens up the generate window (defined below)
     def generate(self):
         global generateWindow
         generateWindow.show()
         
  
-
+#This class is what makes up the Generate window (after clicking the generate button the in MainWindow)
 class GenerateWindow(QtWidgets.QWidget):
+    #You might notice that this is structured a little bit differently (the window is actually a widget that we add to)
+    #Compared to MainWindow which is a window, that has a central widget that we add things to
+    
     def __init__(self, *args, **kwargs):
         super(GenerateWindow, self).__init__(*args, **kwargs)
-    
+        #We are setting up 2 layoutsL: mainLayout and top_inputs
+        #mainLayout is the main layout of the generate window. Everything gets added to this 
+        #top_inputs is the layout of the paramters that are not included in the dynamic menus (currently the extra sin/chirp/periodic params)
+        #There are separate layouts and boxes like this (as you'll see below) so I could format and control them independently of each other 
         self.mainLayout = QtWidgets.QVBoxLayout()
         self.top_inputs = QtWidgets.QGridLayout() 
-        
+        #This is the dropdown menu to select a signal type 
         self.signals_label = QtWidgets.QLabel("Signal Type:")
         self.signals = QtWidgets.QComboBox()
-        # self.signals.insertAtTop("Please select a signal")
         self.signals.insertItem(0,"Periodic")
         self.signals.insertItem(0,"Sin")
         self.signals.insertItem(0,"Chirp")
@@ -158,26 +133,22 @@ class GenerateWindow(QtWidgets.QWidget):
         self.signals.insertItem(0,"Pulse")
         self.top_inputs.addWidget(self.signals_label,0,0)
         self.top_inputs.addWidget(self.signals,0,1)
-        self.signals.currentIndexChanged.connect(lambda: change(str(self.signals.currentText()),self.sin_box,self.chirp_box)) # USE THIS TO PASS THE COMBOBOX INTO THE FUNCTION ARGUMENT - USE THAT FOR DYNAMIC MENU CHANGES ON CHANGE 
+        #This line connects the dropdown to a function that populates the dynamic menus. We pass in 3 arguments: the current text selected, and the two boxes for the dynamic menu
+        self.signals.currentIndexChanged.connect(lambda: change(str(self.signals.currentText()),self.sin_box,self.chirp_box)) 
         
-        
-        
-# NOTES – 
-# Tsilence, tramp = ms
-# Freq khz
-# Amp volts 
-# offset = 0 default, read only volts
-# send generated waves to spescific channels in generate menu 
-#number of repeeated sounds -> called number of averages 
-#floats for all except number reps 
-#multiple graphs - stack them 
 
         
+        #----------------------------------------------------------------------------------------------------------------------------------------------   
+        #The following section is setting up the different textboxes for the various paramters. They currently are not attached to any functions,
+        #so when you want add them to the backend this needs to be added in so they're linked to the global variables above 
+        
+        #first we create the different components (label, units, textbox and validator which limits the inputs (floats, int, etc))
         self.signals_label = QtWidgets.QLabel("Sampling Frequency:")
         self.signals_unit = QtWidgets.QLabel("kHz")
         self.signal_freq = QtWidgets.QLineEdit()
         int_validator= QtGui.QDoubleValidator(0,10000,4)
         self.signal_freq.setValidator(int_validator)
+        #then these 3 lines add them into our layout. The numbers inidicate the location (treating the layout like a grid format)
         self.top_inputs.addWidget(self.signals_label,1,0)
         self.top_inputs.addWidget(self.signal_freq,1,1)
         self.top_inputs.addWidget(self.signals_unit,1,2)
@@ -223,6 +194,8 @@ class GenerateWindow(QtWidgets.QWidget):
         self.top_inputs.addWidget(self.signal_freq,6,1)
         self.top_inputs.addWidget(self.signals_unit,6,2)
         
+        #----------------------------------------------------------------------------------------------------------------------------------------------
+        #These are the dynamic menus that use separate layouts and boxes so we can control them independently
         #start f0 and end f2 dynamic menu
         self.chirp_box = QtWidgets.QGroupBox() 
         self.chirp_layout= QtWidgets.QGridLayout() 
@@ -254,12 +227,14 @@ class GenerateWindow(QtWidgets.QWidget):
         self.sin_layout.addWidget(frequency,6,1)
         self.sin_layout.addWidget(self.signals_unit,6,2)
         self.sin_box.setLayout(self.sin_layout)
+        #----------------------------------------------------------------------------------------------------------------------------------------------
         
-        
+        #This is the button that should be used to eventually add the paramters to the global variables.
+        #Should make a function to do this that connects to this button (like we did with the drop down menu above)
         self.confirm = QtWidgets.QPushButton("Generate")
         
       
-        
+        #here we add the layouts the the mainlayout 
         self.top_inputs_box = QtWidgets.QGroupBox() 
         self.top_inputs_box.setLayout(self.top_inputs)
         self.mainLayout.addWidget(self.top_inputs_box)
@@ -271,7 +246,7 @@ class GenerateWindow(QtWidgets.QWidget):
         self.setLayout(self.mainLayout)
         
 
-        
+#function to display the different dynamic menus         
 def change(text,sin,chirp): 
     if(text=="Sin"): 
         chirp.hide()
@@ -285,7 +260,8 @@ def change(text,sin,chirp):
     else: 
         chirp.hide()
         sin.hide()
-        
+
+#main function that populates everything         
 def main():
     # playSound(filepath)
 
