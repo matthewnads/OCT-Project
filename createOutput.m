@@ -41,8 +41,8 @@ function [output] = createOutput(type, fs, amp, tsil, tramp, offset, varargin)
         
            output = output.*amp;
         case 1 %noise
-            lb = -(amp/2) + offset; %change
-            ub = (amp/2) + offset; % 
+            lb = -(amp/2); %change
+            ub = (amp/2); % 
             samp = fs*StopTime;
             output = lb + rand(1,samp)*(ub - lb);
             output = rot90(output);

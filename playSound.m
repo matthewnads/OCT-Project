@@ -1,37 +1,31 @@
-function playSound(channel) %select channel
-    %select channel number(s)
-    % - 
-    %select which waveform for each type
-    %output to daq board
+function playSound(Fs, signal) %select channel
+%    params - Fs - sampling frequency, data
+%    optional params - channel
 
     %d = daq("ni"); %data acquisition object for NI-USB 6363
     %d = daq("directsound"); %Windows sound
 
-    Fs = 44000;
-
-    signal = createOutput(0, Fs, 0.1, 0.2, 1);
     [names, dq, channels, devID, defMode] = initOutput(Fs);
 
-    %addinput(dirdaq, devID, channels(1), defMode)
+    %addinput(dirdaq, devID, channels(1), defMode) % add outputs
     %addoutput(dirdaq, devID, channels(1), defMode)
     %addoutput(dq, devID, channels(channel), defMode);
     
     %start(dq,"RepeatOutput")%repeat output
     
 
-    %dq.NumDigitalTriggersPerRun = 1;
-    %dq.DigitalTriggerTimeout = 60;
+    %dq.NumDigitalTriggersPerRun = 1; %specifies number of triggers to
+    %watch for
+    %dq.DigitalTriggerTimeout = 60; %time out
 
     %addinput(dq, devID, channels(1), defMode)
     addoutput(dq, devID, channels(1), defMode)
 
     %trig = addtrigger(dq, "Digital", "StartTrigger", "External", strcat(devID,"/PFI0"));
+    %adds trigger
 
-    write(dq, signal)
+    write(dq, signal) %writes signal
     %pause(1)
-    %stop(dq)
-
-    %channels.Type
-    %add channels    
+    %stop(dq) 
 
 end
