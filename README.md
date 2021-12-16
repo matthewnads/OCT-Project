@@ -6,7 +6,7 @@ Main branch is production code. It is highly suggested any changes be committed 
 
 Remember, we don't actually use PySide2 but [PyQt5](https://www.riverbankcomputing.com/software/pyqt/). Here are the [docs](riverbankcomputing.com/static/Docs/PyQt5/) which you may need if you run into any errors, but you should be fine with the PySide docs.
 
-##Code
+## Code
 
 The following are brief descriptions and quick tips for relevant Matlab functions and python files in this project.
 
