@@ -9,13 +9,13 @@ function [names, dirdaq, channels, devID, defMode] = initOutput(samp_Rate)%dirni
 %     dq = daqlist("directsound");
     dq = daqlist("ni");
 
-%     names = dq.Model;
+    names = dq.Model;
     %size = height(dq);
 
 %     devID = dq.DeviceID(5);
     devID = dq.DeviceID(1);
 
-%     devInfo = dq.DeviceInfo(5)
+%      devInfo = dq.DeviceInfo(5);
     devInfo = dq.DeviceInfo(1);
 
 %     channels = devInfo.Subsystems.ChannelNames;

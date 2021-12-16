@@ -5,6 +5,10 @@ function playSound(Fs, signal) %select channel
     %d = daq("ni"); %data acquisition object for NI-USB 6363
     %d = daq("directsound"); %Windows sound
 
+    if (size(signal, 2) > 1)
+        signal = rot90(signal);
+    end
+
     [names, dq, channels, devID, defMode] = initOutput(Fs);
 
     %addinput(dirdaq, devID, channels(1), defMode) % add outputs
@@ -20,6 +24,8 @@ function playSound(Fs, signal) %select channel
 
     %addinput(dq, devID, channels(1), defMode)
     addoutput(dq, devID, channels(1), defMode)
+%     addoutput(dq, devID, channels(2), defMode)
+
 
     %trig = addtrigger(dq, "Digital", "StartTrigger", "External", strcat(devID,"/PFI0"));
     %adds trigger

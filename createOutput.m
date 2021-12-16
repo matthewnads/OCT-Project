@@ -1,5 +1,5 @@
 % function [output] = createOutput(type, fs, amp, tsil, tramp, offset, StopTime, period, sine_F, f0, f1, square_F)
-function [output] = createOutput(type, fs, amp, tsil, tramp, offset, reps, varargin)
+function [output] = createOutput(type, fs, amp, tsil, tramp, offset, varargin)
 
     % seconds StopTime
 

@@ -118,9 +118,8 @@ class MainWindow(QtWidgets.QMainWindow):
     ##   ------------------------------------------------------------------------
     # calls the matlab playsound function
     def play(self):
-        print(sampling_frequency)
-
-        # eng1.playSound(sampling_frequency, nargout=0)
+        data = matlab.double(output.tolist())  # convert output list to regular list
+        eng1.playSound(sampling_frequency, data, nargout=0)
 
     #   ------------------------------------------------------------------------
     # this function opens up the generate window (defined below)
@@ -274,6 +273,7 @@ class GenerateWindow(QtWidgets.QWidget):
         global output, sampling_frequency, n
 
         sampling_frequency = float(self.signal_freq.text()) * 1000
+        n = int(self.reps.text())
 
         if self.signals.currentIndex() == 3:  # sine function inputs
             output = eng1.createOutput(
@@ -285,9 +285,8 @@ class GenerateWindow(QtWidgets.QWidget):
                 float(self.signal_offset.text()),  # offset
                 float(self.frequency.text()),  # sine frequency
             )
-        elif (
-            self.signals.currentIndex() == 2 or self.signals.currentIndex == 4
-        ):  # chirp and whatever else function inputs
+        elif self.signals.currentIndex() == 2 or self.signals.currentIndex() == 4:
+            # chirp and whatever else function inputs
             output = eng1.createOutput(
                 float(self.signals.currentIndex()),
                 sampling_frequency,
@@ -307,8 +306,6 @@ class GenerateWindow(QtWidgets.QWidget):
                 float(self.signal_tramp.text()),
                 float(self.signal_offset.text()),
             )
-
-        n = int(self.reps.text())
         output = np.asarray(output, dtype=np.float32)
         output = output.reshape(len(output))
         output = np.tile(output, n)
@@ -338,7 +335,6 @@ def change(text, sin, chirp):
 
 # main function that populates everything
 def main():
-    # playSound(filepath)
 
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
