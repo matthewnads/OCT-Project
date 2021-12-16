@@ -1,5 +1,6 @@
 # NOTE: testGUI.py is the most complete form of the software.
 from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QAction, qApp, QApplication
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
@@ -9,6 +10,8 @@ import scipy.io.wavfile as wav
 import sys
 import random
 import colorsys
+
+np.set_printoptions(threshold=sys.maxsize)  # to prevent truncation
 
 eng1 = matlab.engine.start_matlab()
 generateWindow = None
@@ -21,6 +24,7 @@ t_ramp = 0
 offset = 0
 sampling_frequency = 0
 output = None
+n = 0
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -52,25 +56,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.central.setLayout(self.mainLayout)
         self.defineToolbar()
 
-    def plottingFig(self, y, Fs, tt, graphWidget):
+    def plottingFig(self):
         h, s, l = (
             random.random(),
             0.5 + random.random() / 2.0,
             0.4 + random.random() / 5.0,
         )
         r, g, b = [int(256 * i) for i in colorsys.hls_to_rgb(h, l, s)]
-        y = np.asarray(y, dtype=np.float32)
-        y = y.reshape(
-            len(y),
-        )
-        t = np.arange(0, tt, 1 / Fs)
+        y = np.asarray(output, dtype=np.float32)
+        y = output
+        Fs = sampling_frequency
+
+        t = np.arange(0, n, 1 / Fs)  # n is reps and is used as seconds.
         self.graphWidget.setLabel(
-            "left", '<span style="color:black;font-size:20px">Amplitude</span>'
+            "left", '<span style="color:black;font-size:20px">Amplitude (Volts)</span>'
         )
         self.graphWidget.setLabel(
             "bottom", '<span style="color:black;font-size:20px">Time (Seconds)</span>'
         )
-        graphWidget.plot(t, y, pen=pg.mkPen(color=(r, g, b)))
+        self.graphWidget.plot(t, y, pen=pg.mkPen(color=(r, g, b)))
 
     # ------------------------------------------------------------------------
     # function to define toolbar
@@ -104,7 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self.readFile(filepath)
 
-    def readFile(self, filepath):
+    def readFile(self, filepath):  # deprecated function
 
         y, Fs, tt = eng1.tGraph(filepath, nargout=3)
         self.plottingFig(y, Fs, tt, self.graphWidget)
@@ -115,19 +119,23 @@ class MainWindow(QtWidgets.QMainWindow):
     # calls the matlab playsound function
     def play(self):
         print(sampling_frequency)
+
         # eng1.playSound(sampling_frequency, nargout=0)
 
     #   ------------------------------------------------------------------------
     # this function opens up the generate window (defined below)
     def generate(self):
-        global generateWindow
-        generateWindow.show()
+        self.generateWindow = GenerateWindow()
+        self.generateWindow.closed.connect(self.plottingFig)
+        self.generateWindow.show()
 
 
 # This class is what makes up the Generate window (after clicking the generate button the in MainWindow)
 class GenerateWindow(QtWidgets.QWidget):
     # You might notice that this is structured a little bit differently (the window is actually a widget that we add to)
     # Compared to MainWindow which is a window, that has a central widget that we add things to
+
+    closed = pyqtSignal()
 
     def __init__(self, *args, **kwargs):
         super(GenerateWindow, self).__init__(*args, **kwargs)
@@ -145,6 +153,7 @@ class GenerateWindow(QtWidgets.QWidget):
         self.signals.insertItem(0, "Chirp")
         self.signals.insertItem(0, "Noise")
         self.signals.insertItem(0, "Pulse")
+        self.signals.setCurrentIndex(0)
         self.top_inputs.addWidget(self.signals_label, 0, 0)
         self.top_inputs.addWidget(self.signals, 0, 1)
         # This line connects the dropdown to a function that populates the dynamic menus. We pass in 3 arguments: the current text selected, and the two boxes for the dynamic menu
@@ -202,11 +211,11 @@ class GenerateWindow(QtWidgets.QWidget):
         self.top_inputs.addWidget(self.signals_unit, 5, 2)
 
         self.signals_label = QtWidgets.QLabel("Number of Reps:")
-        self.signal_freq = QtWidgets.QLineEdit()
+        self.reps = QtWidgets.QLineEdit()
         rep_validator = QtGui.QIntValidator(1, 1000000)
-        self.signal_freq.setValidator(rep_validator)
+        self.reps.setValidator(rep_validator)
         self.top_inputs.addWidget(self.signals_label, 6, 0)
-        self.top_inputs.addWidget(self.signal_freq, 6, 1)
+        self.top_inputs.addWidget(self.reps, 6, 1)
         self.top_inputs.addWidget(self.signals_unit, 6, 2)
 
         # ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -262,23 +271,26 @@ class GenerateWindow(QtWidgets.QWidget):
     def createWaveform(self):
         # main params: type, sampling frequency (khz), amp (v), tsilence (ms), t-ramp (ms), offset (0 default, in volts), stop time (s)
         # optional args: duty cycle, period, f0, f1 (chirp), sine
-        global output
+        global output, sampling_frequency, n
+
+        sampling_frequency = float(self.signal_freq.text()) * 1000
+
         if self.signals.currentIndex() == 3:  # sine function inputs
             output = eng1.createOutput(
-                self.signals.currentIndex(),
-                float(self.signal_freq.text()),
-                float(self.signal_amp.text()),
-                float(self.signal_silence.text()),
-                float(self.signal_tramp.text()),
-                float(self.signal_offset.text()),
-                float(self.frequency.text()),
+                self.signals.currentIndex(),  # index to indicate what kind of function
+                sampling_frequency,  # sampling frequency
+                float(self.signal_amp.text()),  # signal amplitude
+                float(self.signal_silence.text()),  # t silence
+                float(self.signal_tramp.text()),  # t ramp
+                float(self.signal_offset.text()),  # offset
+                float(self.frequency.text()),  # sine frequency
             )
         elif (
             self.signals.currentIndex() == 2 or self.signals.currentIndex == 4
         ):  # chirp and whatever else function inputs
             output = eng1.createOutput(
                 float(self.signals.currentIndex()),
-                float(self.signal_freq.text()),
+                sampling_frequency,
                 float(self.signal_amp.text()),
                 float(self.signal_silence.text()),
                 float(self.signal_tramp.text()),
@@ -289,14 +301,23 @@ class GenerateWindow(QtWidgets.QWidget):
         else:
             output = eng1.createOutput(  # all other functions i.e. noise function.
                 self.signals.currentIndex(),
-                float(self.signal_freq.text()),
+                sampling_frequency,
                 float(self.signal_amp.text()),
                 float(self.signal_silence.text()),
                 float(self.signal_tramp.text()),
                 float(self.signal_offset.text()),
             )
 
+        n = int(self.reps.text())
+        output = np.asarray(output, dtype=np.float32)
+        output = output.reshape(len(output))
+        output = np.tile(output, n)
+        # based one second time intervals for total signal size per wave
         self.close()
+
+    def closeEvent(self, event):
+        self.closed.emit()
+        event.accept()
 
 
 # function to display the different dynamic menus
@@ -322,13 +343,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
     main.show()
-    global generateWindow
-    generateWindow = GenerateWindow()
     sys.exit(app.exec_())
-
-
-def playSound(eng1):
-    eng1.playSound(nargout=0)
 
 
 if __name__ == "__main__":

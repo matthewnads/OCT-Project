@@ -1,5 +1,5 @@
 % function [output] = createOutput(type, fs, amp, tsil, tramp, offset, StopTime, period, sine_F, f0, f1, square_F)
-function [output] = createOutput(type, fs, amp, tsil, tramp, offset, varargin)
+function [output] = createOutput(type, fs, amp, tsil, tramp, offset, reps, varargin)
 
     % seconds StopTime
 
@@ -17,7 +17,6 @@ function [output] = createOutput(type, fs, amp, tsil, tramp, offset, varargin)
         StopTime = 1;
     end
 
-    fs = fs*1000;
     tramp = tramp/1000;
     tsil = tsil/1000;
 
@@ -103,6 +102,6 @@ function [output] = createOutput(type, fs, amp, tsil, tramp, offset, varargin)
              
     output=amp.*output.*env + offset;
 
-    plot(t,output)
+%     plot(t,output)
 
 end

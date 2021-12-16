@@ -1,4 +1,4 @@
-function tGraph()
+function tGraph() %deprecated
     sine_F = 5000;
     fs = 44000;
     amp= 2;
