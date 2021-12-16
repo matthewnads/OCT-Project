@@ -11,6 +11,7 @@ Remember, we don't actually use PySide2 but [PyQt5](https://www.riverbankcomputi
 Ensure that matlab engine is enabled on your PC and that you have the necessary python frameworks and libraries installed. See the following relevant documentation for more info.
 
 [MATLAB Engine API for Python](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html)
+
 [Installing Python Packages](https://packaging.python.org/en/latest/tutorials/installing-packages/)
 
 ## Code
