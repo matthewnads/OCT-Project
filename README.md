@@ -8,6 +8,8 @@ Remember, we don't actually use PySide2 but [PyQt5](https://www.riverbankcomputi
 
 ##Code
 
+The following are brief descriptions and quick tips for relevant functions and python files in this project.
+
 ### testGUI.py 
 This has the latest code for the GUI. The idea was that the backend will eventually connect here to get the global variables and use them in subsequent MATLAB functions. 
 
