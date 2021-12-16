@@ -5,7 +5,7 @@ function playSound(Fs, signal) %select channel
     %d = daq("ni"); %data acquisition object for NI-USB 6363
     %d = daq("directsound"); %Windows sound
 
-    if (size(signal, 2) > 1)
+    if (size(signal, 2) > 1) %ensures that signal array is correct in dim
         signal = rot90(signal);
     end
 
