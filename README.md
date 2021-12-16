@@ -6,6 +6,13 @@ Main branch is production code. It is highly suggested any changes be committed 
 
 Remember, we don't actually use PySide2 but [PyQt5](https://www.riverbankcomputing.com/software/pyqt/). Here are the [docs](riverbankcomputing.com/static/Docs/PyQt5/) which you may need if you run into any errors, but you should be fine with the PySide docs.
 
+## Requirements
+
+Ensure that matlab engine is enabled on your PC and that you have the necessary python frameworks and libraries installed. See the following relevant documentation for more info.
+
+[MATLAB Engine API for Python](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html)
+[Installing Python Packages](https://packaging.python.org/en/latest/tutorials/installing-packages/)
+
 ## Code
 
 The following are brief descriptions and quick tips for relevant Matlab functions and python files in this project.
