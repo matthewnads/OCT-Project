@@ -379,38 +379,36 @@ class GenerateWindow(QtWidgets.QWidget):
         # main params: type, sampling frequency (khz), amp (v), tsilence (ms), t-ramp (ms), offset (0 default, in volts), stop time (s)
         # optional args: duty cycle, period, f0, f1 (chirp), sine
         global output
-        if self.signals.currentIndex == 3:
+        if self.signals.currentIndex() == 3:
             output = eng1.createOutput(
-                self.signals.currentIndex,
-                self.signal_freq.text(),
-                self.signal_amp.text(),
-                self.signal_silence.text(),
-                self.signal_tramp.text(),
-                self.signal_offset.text(),
-                self.frequency.text(),
+                self.signals.currentIndex(),
+                float(self.signal_freq.text()),
+                float(self.signal_amp.text()),
+                float(self.signal_silence.text()),
+                float(self.signal_tramp.text()),
+                float(self.signal_offset.text()),
+                float(self.frequency.text()),
             )
-        elif self.signals.currentIndex == 2 or self.signals.currentIndex == 4:
+        elif self.signals.currentIndex() == 2 or self.signals.currentIndex == 4:
             output = eng1.createOutput(
-                self.signals.currentIndex,
-                self.signal_freq.text(),
-                self.signal_amp.text(),
-                self.signal_silence.text(),
-                self.signal_tramp.text(),
-                self.signal_offset.text(),
-                self.f0.text(),
-                self.f1.text(),
+                float(self.signals.currentIndex()),
+                float(self.signal_freq.text()),
+                float(self.signal_amp.text()),
+                float(self.signal_silence.text()),
+                float(self.signal_tramp.text()),
+                float(self.signal_offset.text()),
+                float(self.f0.text()),
+                float(self.f1.text()),
             )
         else:
             output = eng1.createOutput(
-                self.signals.currentIndex,
+                self.signals.currentIndex(),
                 float(self.signal_freq.text()),
                 float(self.signal_amp.text()),
                 float(self.signal_silence.text()),
                 float(self.signal_tramp.text()),
                 float(self.signal_offset.text()),
             )
-
-        print(output)
 
         self.close()
 

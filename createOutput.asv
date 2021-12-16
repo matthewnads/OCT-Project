@@ -47,8 +47,7 @@ function [output] = createOutput(type, fs, amp, tsil, tramp, offset, varargin)
             output = lb + rand(1,samp)*(ub - lb);
             output = rot90(output);
         case 2 %chirp
-            f0 = varargin{1};
-            f1 = varargin{2};
+            f0 = 
             if ~exist('f0','var')
                 f0 = 1000;
             end
@@ -62,12 +61,10 @@ function [output] = createOutput(type, fs, amp, tsil, tramp, offset, varargin)
             if ~exist('sine_F','var')
                 sine_F = 5000;
             end 
-            output = sin(2*pi*sine_F.*t);
+            output = sin(2*pi*sine_F*t);
         
         case 4 %periodic/square
             %???? not right
-            f0 = varargin{1};
-            f1 = varargin{2};
             if ~exist('square_F','var')
                 square_F = 5000;
             end
