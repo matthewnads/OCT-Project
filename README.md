@@ -8,7 +8,7 @@ Remember, we don't actually use PySide2 but [PyQt5](https://www.riverbankcomputi
 
 ##Code
 
-The following are brief descriptions and quick tips for relevant functions and python files in this project.
+The following are brief descriptions and quick tips for relevant Matlab functions and python files in this project.
 
 ### testGUI.py 
 This has the latest code for the GUI. The idea was that the backend will eventually connect here to get the global variables and use them in subsequent MATLAB functions. 
@@ -30,8 +30,12 @@ As shown in the above example, if you are using a numpy array, it should be also
 
 ### initOutput.m
 
-This function is ready to be used with Windows Directsound devices and NI DAQ devices. Currently it is set to initialize only NI DAQ devices. To switch to Directsound devices, ensure that all the output arguments are commented out appropriately, otherwise it will throw an error at you.
+This function initializes a DAQ device to be used. It is ready to be used with Windows Directsound devices and NI DAQ devices. Currently it is set to initialize only NI DAQ devices. To switch to Directsound devices, ensure that all the output arguments are commented out appropriately, otherwise it will throw an error at you.
 
 ### playSound.m
 
-This function is also ready to be used with Windows Directsound devices and NI DAQ devices. It is also capable of listening for trigger signals (from the appropriate inputs). Comment out the appropriate lines to enable the functionality you desire.
+This function can drive output or be made to get input from hardware. This function is also ready to be used with Windows Directsound devices and NI DAQ devices. It is also capable of listening for trigger signals (from the appropriate inputs). Comment out the appropriate lines to enable the functionality you desire.
+
+### createOutput.m
+
+This function creates the output array with specified evenlope of a signal. It uses switch case to create the necessary function and then applies the appropriate amplitude, offset, etc.
